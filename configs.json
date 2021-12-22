@@ -1,3 +1,20 @@
 {
-	"port": 3939
+	"pocer": {
+		"port": 3939
+	},
+	"db": {
+		"user": "nftassemblyregistry",
+		"host": "localhost",
+		"database": "nftassemblyregistry",
+		"password": "nftassemblyregistry",
+		"port": 5432
+	},
+	"eth": {
+		"baseURI": "http://localhost:$PORT/api/tokens/",
+		"salt": "8A69180811F299F5F87CC9DE2CF8775344",
+		"node": "ws://localhost:7545",
+		"networkId": "*",
+		"account": null,
+		"password": null
+	}
 }

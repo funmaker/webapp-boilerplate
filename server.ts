@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import app from './server/app';
 import configs from "./server/helpers/configs";
 
-let port = configs.port || 3000;
+let port = configs.pocer.port || 3000;
 if(process.env.DOCKERIZED) port = 80;
 
 const server = http.createServer(app);
@@ -13,7 +13,7 @@ const origApp = app;
 let currentApp = app;
 server.listen(port);
 
-console.log(`\n${chalk.bold("Boilerplate")} started on port ${chalk.yellow.bold("" + port)}`);
+console.log(`\n${chalk.bold("NFT Assembly Registry")} started on port ${chalk.yellow.bold("" + port)}`);
 console.log(`Environment: ${chalk.yellow.bold("" + process.env.NODE_ENV)}.`);
 console.log(chalk.dim.white(`Press Ctrl-C to terminate.\n`));
 

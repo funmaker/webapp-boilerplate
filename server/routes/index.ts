@@ -6,7 +6,7 @@ export const router = PromiseRouter();
 
 router.get('/', (req, res) => {
   const initialData = {
-    kek: `Welcome to Boilerplate 2.0 on ${os.hostname()}!`,
+    kek: `Welcome to NFT Registry on ${os.hostname()}!`,
   };
   
   res.react<IndexResponse>(initialData);

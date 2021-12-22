@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import { router } from "./routes";
 import { reactMiddleware } from "./helpers/reactHelper";
 import HTTPError from "./helpers/HTTPError";
+import "./helpers/db";
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err: Partial<HTTPError>, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err);
+  if(err.HTTPcode !== 404) console.error(err);
   
   const code = err.HTTPcode || 500;
   const result = {
