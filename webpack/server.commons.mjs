@@ -31,7 +31,6 @@ export default {
   target: 'async-node',
   context: root,
   externals: [nodeExternals()],
-  entry: './server.ts',
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     modules: [root, 'node_modules'],
@@ -39,6 +38,7 @@ export default {
   output: {
     path: path.join(root, 'dist'),
     filename: 'server.js',
+    chunkFilename: '[contenthash].server.js',
     devtoolModuleFilenameTemplate: "[absolute-resource-path]",
   },
   node: {

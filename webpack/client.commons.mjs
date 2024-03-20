@@ -36,6 +36,7 @@ export default {
   output: {
     path: path.join(root, 'dist'),
     filename: 'client.js',
+    chunkFilename: '[contenthash].server.js',
   },
   module: {
     rules: [
