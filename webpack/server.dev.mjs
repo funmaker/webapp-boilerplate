@@ -1,9 +1,9 @@
 import webpack from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import { merge } from "webpack-merge";
-import { RunScriptWebpackPlugin } from 'run-script-webpack-plugin'; // https://github.com/ericclemmons/start-server-webpack-plugin/issues/40
-import commons from "./server.commons.mjs";
 import path from "path";
+import { RunScriptWebpackPlugin } from 'run-script-webpack-plugin'; // https://github.com/ericclemmons/start-server-webpack-plugin/issues/40
+import commons, { pureESM } from "./server.commons.mjs";
 
 const isWin = process.platform === "win32";
 const root = process.cwd();
@@ -20,7 +20,10 @@ export default merge(commons, {
   ],
   watch: true,
   externals: [nodeExternals({
-    allowlist: [isWin ? 'webpack/hot/poll?1000' : 'webpack/hot/signal'],
+    allowlist: [
+      isWin ? 'webpack/hot/poll?1000' : 'webpack/hot/signal',
+      ...pureESM,
+    ],
   })],
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

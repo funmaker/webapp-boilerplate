@@ -1,12 +1,11 @@
-import { useLocation } from "react-router";
 import useChange from "./useChange";
+import useLocationParts, { LocationParts } from "./useLocationParts";
 
-type Location = ReturnType<typeof useLocation>;
-type Callback = (current: Location, prev: Location) => void;
-export const locationCmp = (a: Location, b: Location) => a.pathname + a.search === b.pathname + b.search;
+type Callback = (current: LocationParts, prev: LocationParts) => void;
+export const locationCmp = (a: LocationParts, b: LocationParts) => a.pathname + a.search === b.pathname + b.search;
 
 export default function useLocationChange(callback: Callback) {
-  const location = useLocation();
+  const [location] = useLocationParts();
   
   useChange(location, callback, locationCmp);
 }

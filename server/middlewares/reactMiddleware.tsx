@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOMServer from 'react-dom/server';
-import { StaticRouter } from "react-router-dom/server";
 import expressCore from "express-serve-static-core";
+import { Router } from "wouter";
 import App from "../../client/App";
 import { ErrorResponse, InitialData } from "../../types/api";
 import index from '../views/index.handlebars';
@@ -35,9 +35,9 @@ export default function reactMiddleware(req: expressCore.RequestEx<any, any, any
           
           res.send(index({
             reactContent: ReactDOMServer.renderToString(
-              <StaticRouter location={req.originalUrl}>
+              <Router ssrPath={req.originalUrl}>
                 <App initialData={initialData} />
-              </StaticRouter>,
+              </Router>,
             ),
             initialData: initialDataJSON,
             production: process.env.NODE_ENV === 'production',

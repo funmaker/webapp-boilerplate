@@ -1,11 +1,20 @@
-import { Navigate } from "react-router";
-import React, { useEffect } from "react";
-import { toast } from "react-toastify";
+import React from "react";
+import { Button, Paper, styled, Typography } from "@mui/material";
+import Link from "../components/Link";
 
 export default function NotFoundPage() {
-  useEffect(() => {
-    toast.error("Page Not Found");
-  }, []);
-  
-  return <Navigate to="/" />;
+  return (
+    <StyledPaper>
+      <Typography variant="h4" paragraph>Page Not Found</Typography>
+      <Button variant="contained" component={Link} to="/" noMui>Return to Home Page</Button>
+    </StyledPaper>
+  );
 }
+
+const StyledPaper = styled(Paper)`
+  padding: 2em;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+`;

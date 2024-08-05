@@ -1,13 +1,11 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import axios, { Canceler } from "axios";
-import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { Config, InitialData } from "../../types/api";
 import { ClientError } from "../helpers/clientError";
-import { qsStringify } from "../helpers/utils";
 import requestJSON from "../helpers/requestJSON";
 import { locationCmp } from "./useLocationChange";
-import useRefCache from "./useRefCache";
+import useLocationParts from "./useLocationParts";
 
 type UnlistenCallback = () => void;
 
@@ -49,9 +47,7 @@ export function PageDataProvider({ initialData, children }: PageDataProviderProp
   const [pageError, setPageError] = useState<ClientError | null>(initialData?._error ? new ClientError(initialData._error) : null);
   const [fetching, setFetching] = useState(false);
   const fetchEmitter = useRef<FetchEmitter | null>(null);
-  const navigate = useNavigate();
-  const navigateRef = useRefCache(navigate); // TODO: remix-run/react-router/issues/7634
-  const location = useLocation();
+  const [location] = useLocationParts();
   const locationRef = useRef(location);
   const locationChanged = !locationCmp(locationRef.current, location);
   const error = useRef(!!pageError);
@@ -74,21 +70,6 @@ export function PageDataProvider({ initialData, children }: PageDataProviderProp
       if(pageError) setPageError(null);
     }
   }, [locationChanged, pageData, pageError]);
-  
-  useEffect(() => {
-    const initialError = initialData?._error;
-    if(initialError) {
-      if(initialError.status === 401) {
-        toast.warning(initialError.message);
-        navigateRef.current(`/auth/login${qsStringify({ redirect: locationRef.current.pathname + locationRef.current.search + locationRef.current.hash })}`);
-      } else if(initialError.status === 403 || (initialError.status === 404 && initialError.message === "Route not found")) {
-        toast.warning(initialError.message);
-        navigateRef.current(`/`);
-      } else if(initialError.status !== 404) {
-        toast.error(initialError?.message || "Something Happened");
-      }
-    }
-  }, [navigateRef, initialData]);
   
   const fetch = useCallback(() => {
     if(error.current) return () => {};

@@ -3,6 +3,10 @@ import nodeExternals from 'webpack-node-externals';
 
 const root = process.cwd();
 
+export const pureESM = [
+  "wouter",
+];
+
 export const babelOptions = {
   presets: [
     ["@babel/preset-env", {
@@ -30,7 +34,9 @@ export const babelOptions = {
 export default {
   target: 'async-node',
   context: root,
-  externals: [nodeExternals()],
+  externals: [nodeExternals({
+    allowlist: pureESM,
+  })],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     modules: [root, 'node_modules'],
