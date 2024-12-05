@@ -33,7 +33,7 @@
 		"core-js": "^3.35.1",
 		"csurf": "^1.11.0",
 		"detect-node": "^2.1.0",
-		"express": "^4.21.0",
+		"express": "^4.21.2",
 		"express-handlebars": "^7.1.2",
 		"express-promise-router": "^4.1.1",
 		"express-session": "^1.17.3",
