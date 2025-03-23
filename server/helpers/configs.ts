@@ -1,14 +1,9 @@
 import * as fs from 'fs';
-import { PoolConfig } from "pg";
 import defaultConfig from "../../configs.json";
 
 interface Configs {
   port: number;
   host?: string;
-  session: {
-    secret: string;
-  };
-  db: PoolConfig;
 }
 
 type DeepPartial<T> = T extends Record<string, unknown> ? {
