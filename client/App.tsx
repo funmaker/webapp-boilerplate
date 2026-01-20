@@ -14,12 +14,6 @@ interface AppProps {
   initialData: any;
 }
 
-declare global {
-  interface Window {
-    _csrf: string;
-  }
-}
-
 export default function App({ initialData }: AppProps) {
   const [, navigate] = useLocation();
   
@@ -40,15 +34,15 @@ export default function App({ initialData }: AppProps) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <SSRProvider>
-        <PageDataProvider initialData={initialData}>
-          <Router>
+        <Router>
+          <PageDataProvider initialData={initialData}>
             <Switch>
               <Route path="/"><Layout><IndexPage /></Layout></Route>
               <Route><Layout><NotFoundPage /></Layout></Route>
             </Switch>
-          </Router>
-          <ToastContainer position="bottom-right" newestOnTop />
-        </PageDataProvider>
+            <ToastContainer position="bottom-right" newestOnTop />
+          </PageDataProvider>
+        </Router>
       </SSRProvider>
     </ThemeProvider>
   );

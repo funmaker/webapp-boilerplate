@@ -22,27 +22,25 @@ export default function reactMiddleware(req: expressCore.RequestEx<any, any, any
     // noinspection JSUnreachableSwitchBranches
     switch(req.accepts(['html', 'json'])) {
       case "html": {
-        (async () => {
-          const initialData: InitialData & Data = {
-            ...data,
-            _error: error,
-            _config: {
-              csrf: req.csrfToken ? req.csrfToken() : undefined as any,
-            },
-          };
-          
-          const initialDataJSON = JSON.stringify(initialData).replace(removeTags, tag => tagsToReplace[tag] || tag);
-          
-          res.send(index({
-            reactContent: ReactDOMServer.renderToString(
-              <Router ssrPath={req.originalUrl}>
-                <App initialData={initialData} />
-              </Router>,
-            ),
-            initialData: initialDataJSON,
-            production: process.env.NODE_ENV === 'production',
-          }));
-        })().catch(next);
+        const initialData: InitialData & Data = {
+          ...data,
+          _error: error,
+          _config: {
+            csrf: req.csrfToken ? req.csrfToken() : undefined as any,
+          },
+        };
+        
+        const initialDataJSON = JSON.stringify(initialData).replace(removeTags, tag => tagsToReplace[tag] || tag);
+        
+        res.send(index({
+          reactContent: ReactDOMServer.renderToString(
+            <Router ssrPath={req.originalUrl}>
+              <App initialData={initialData} />
+            </Router>,
+          ),
+          initialData: initialDataJSON,
+          production: process.env.NODE_ENV === 'production',
+        }));
         break;
       }
       

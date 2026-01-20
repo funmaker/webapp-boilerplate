@@ -1,8 +1,9 @@
 import os from 'os';
-import PromiseRouter from "express-promise-router";
+import express from "express";
+import packageJSON from "../../package.json";
 import { IndexPageResponse } from "../../types/api";
 
-export const router = PromiseRouter();
+export const router = express.Router();
 
 router.use((req, res, next) => {
   res.setHeader('Cache-Control', 'max-age=0, no-store');
@@ -13,10 +14,7 @@ router.use((req, res, next) => {
 // Pages go here
 
 router.get<never, IndexPageResponse>('/', async (req, res) => {
-  const initialData = {
-    kek: `Welcome to Boilerplate 3.0 on ${os.hostname()}!`,
-  };
-  
-  res.react(initialData);
+  res.react({
+    kek: `Welcome to Boilerplate ${packageJSON.version} on ${os.hostname()}!`,
+  });
 });
-

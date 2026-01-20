@@ -1,40 +1,35 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios, { Canceler } from "axios";
-import { toast } from "react-toastify";
 import { Config, InitialData } from "../../types/api";
 import { ClientError } from "../helpers/clientError";
 import requestJSON from "../helpers/requestJSON";
-import { locationCmp } from "./useLocationChange";
-import useLocationParts from "./useLocationParts";
+import { setCSRF } from "../helpers/csrf";
+import useLocationParts, { locationCmp, LocationLevel, LocationParts } from "./useLocationParts";
 
-type UnlistenCallback = () => void;
 
-interface PageDataContextState {
+interface PageDataState {
+  location: LocationParts | null;
   pageData: any;
   pageError: ClientError | null;
-  fetching: boolean;
-  fetch: (() => UnlistenCallback) | null;
-  config: Config | null;
+  config: Config;
+  fetching: LocationParts | null;
 }
 
-export const PageDataContext = React.createContext<PageDataContextState>({
-  pageData: null,
-  pageError: null,
-  fetching: false,
-  fetch: null,
-  config: null,
-});
+type UnlistenCallback = () => void;
+type UnlistenablePromise<T> = Promise<T> & { unlisten: UnlistenCallback };
+type FetchFn = (location: LocationParts) => UnlistenablePromise<any>;
 
-declare global {
-  interface Window {
-    _csrf: string;
-  }
+export interface PageDataContextState extends PageDataState {
+  fetch: FetchFn;
 }
 
-interface FetchEmitter {
-  listeners: number;
-  unlisten: UnlistenCallback;
+export const PageDataContext = React.createContext<PageDataContextState | null>(null);
+
+interface FetchRef {
+  location: LocationParts;
+  promise: UnlistenablePromise<any> | null;
   cancel: Canceler;
+  listeners: number;
 }
 
 interface PageDataProviderProps {
@@ -43,80 +38,60 @@ interface PageDataProviderProps {
 }
 
 export function PageDataProvider({ initialData, children }: PageDataProviderProps) {
-  const [pageData, setPageData] = useState<any>(initialData?._error ? null : initialData);
-  const [pageError, setPageError] = useState<ClientError | null>(initialData?._error ? new ClientError(initialData._error) : null);
-  const [fetching, setFetching] = useState(false);
-  const fetchEmitter = useRef<FetchEmitter | null>(null);
+  const fetchRef = useRef<FetchRef | null>(null);
   const [location] = useLocationParts();
-  const locationRef = useRef(location);
-  const locationChanged = !locationCmp(locationRef.current, location);
-  const error = useRef(!!pageError);
-  const config = initialData._config;
+  const [state, setState] = useState<PageDataState>(() => ({
+    location,
+    pageData: initialData?._error ? null : initialData,
+    pageError: initialData?._error ? new ClientError(initialData._error) : null,
+    config: initialData._config,
+    fetching: null,
+  }));
   
-  if(locationChanged) {
-    fetchEmitter.current?.cancel();
-    fetchEmitter.current = null;
-    locationRef.current = location;
-    error.current = false;
-  }
+  useEffect(() => setCSRF(state.config.csrf), [state.config.csrf]);
   
-  useEffect(() => {
-    window._csrf = config.csrf;
-  }, [config.csrf]);
-  
-  useEffect(() => {
-    if(locationChanged) {
-      if(pageData) setPageData(null);
-      if(pageError) setPageError(null);
-    }
-  }, [locationChanged, pageData, pageError]);
-  
-  const fetch = useCallback(() => {
-    if(error.current) return () => {};
-    
-    if(fetchEmitter.current) {
-      fetchEmitter.current.listeners++;
-      return fetchEmitter.current.unlisten;
-    }
-    
-    setFetching(true);
-    
-    let cancelFetch = () => {};
-    requestJSON({
-      waitFix: true,
-      cancelCb: cancel => cancelFetch = cancel,
-    }).then(data => {
-      setPageData(data);
-    }).catch(err => {
-      if(!axios.isCancel(err)) {
-        error.current = true;
-        setPageError(new ClientError(err));
+  const fetch = useCallback<FetchFn>(location => {
+    if(fetchRef.current) {
+      if(locationCmp(fetchRef.current.location, location)) {
+        fetchRef.current.listeners++;
+        if(!fetchRef.current.promise) throw new Error("Invalid page data state. Missing promise!");
+        else return fetchRef.current.promise;
+      } else {
+        fetchRef.current.cancel();
       }
+    }
+    
+    const thisRef: FetchRef = fetchRef.current = {
+      location,
+      promise: null,
+      cancel: () => {},
+      listeners: 1,
+    };
+    
+    const promise = requestJSON<any>({
+      waitFix: true,
+      cancelCb: cancel => thisRef.cancel = cancel,
+    }).then(data => {
+      setState(state => ({ ...state, location, fetching: null, pageData: data, pageError: null }));
+    }).catch(err => {
+      if(!axios.isCancel(err)) setState(state => ({ ...state, location, fetching: null, pageData: null, pageError: new ClientError(err) }));
     }).finally(() => {
-      fetchEmitter.current = null;
-      setFetching(false);
+      if(fetchRef.current === thisRef) fetchRef.current = null;
     });
     
-    const self = fetchEmitter.current = {
-      listeners: 1,
-      unlisten() {
-        self.listeners--;
-        if(self.listeners <= 0) self.cancel();
+    thisRef.promise = Object.assign(promise, {
+      unlisten: () => {
+        thisRef.listeners--;
+        if(thisRef.listeners <= 0) thisRef.cancel();
       },
-      cancel: cancelFetch,
-    };
-    fetchEmitter.current.unlisten = fetchEmitter.current.unlisten.bind(fetchEmitter.current);
+    });
     
-    return fetchEmitter.current.unlisten;
+    setState(state => ({ ...state, fetching: location }));
+    
+    return thisRef.promise;
   }, []);
   
-  const value = useMemo(() => ({
-    pageData: locationChanged ? null : pageData,
-    pageError: locationChanged ? null : pageError,
-    fetching,
-    fetch,
-    config,
-  }), [locationChanged, pageData, pageError, fetching, fetch, config]);
+  const value = useMemo<PageDataContextState>(() => ({...state, fetch }), [state, fetch]);
   
   return (
     <PageDataContext.Provider value={value}>
@@ -125,28 +100,32 @@ export function PageDataProvider({ initialData, children }: PageDataProviderProp
   );
 }
 
-export default function usePageData<T>(autoFetch = true) {
-  const { pageData, fetching, fetch, pageError } = useContext(PageDataContext);
-  if(!fetch) throw new Error("useConfig must be used within PageData context");
+export default function usePageData<T>(autoFetch = true, level: LocationLevel = "search") {
+  const [location] = useLocationParts();
+  const context = use(PageDataContext);
+  if(!context) throw new Error("useConfig must be used within PageData context");
   
-  const loaded = pageData !== null;
+  const validLocation = !!context.location && locationCmp(location, context.location, level);
+  const willFetch = autoFetch && !validLocation;
+  const fetch = context.fetch;
+  const refresh = () => fetch(location) as UnlistenablePromise<T>;
   
   useEffect(() => {
-    if(loaded || !autoFetch) return;
-    else return fetch();
-  }, [fetch, loaded, autoFetch]);
+    if(willFetch) return fetch(location).unlisten;
+    return;
+  }, [fetch, location, willFetch]);
   
   return {
-    pageData: pageData as T | null,
-    fetching: fetching || (autoFetch && !pageData && !pageError),
-    refresh: fetch,
-    pageError,
+    pageData: validLocation && context.pageData ? context.pageData as T : null,
+    pageError: validLocation && context.pageError ? context.pageError : null,
+    fetching: willFetch || context.fetching && locationCmp(location, context.fetching) || false,
+    refresh,
   };
 }
 
 export function useConfig(): Config {
-  const { config } = useContext(PageDataContext);
-  if(!config) throw new Error("useConfig must be used within PageData context");
+  const context = use(PageDataContext);
+  if(!context) throw new Error("useConfig must be used within PageData context");
   
-  return config;
+  return context.config;
 }

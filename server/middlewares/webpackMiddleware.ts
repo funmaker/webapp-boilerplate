@@ -3,7 +3,7 @@ import webpackHotMiddleware from "webpack-hot-middleware";
 import webpackDevMiddleware from "webpack-dev-middleware";
 import express from "express";
 import chalk from 'chalk';
-import webpackClientDevConfig from "../../webpack/client.dev.mjs";
+import webpackClientDevConfig from "../../webpack/client.dev";
 
 let cachedRouter: express.Router | null = null; // Cache for Server Side Hot Module Replacement
 
@@ -16,7 +16,7 @@ export const mount = () => {
   const compiler = webpack(webpackClientDevConfig);
   
   router.use(webpackDevMiddleware(compiler, {
-    publicPath: webpackClientDevConfig.output?.publicPath as string,
+    publicPath: webpackClientDevConfig.output?.publicPath as string | undefined,
   }));
   
   router.use(webpackHotMiddleware(compiler, {

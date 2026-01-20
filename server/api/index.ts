@@ -1,10 +1,10 @@
 import http from "http";
-import PromiseRouter from "express-promise-router";
+import express from "express";
 import expressCore from "express-serve-static-core";
 import HTTPError from "../helpers/HTTPError";
 import { ErrorResponse } from "../../types/api";
 
-export const router = PromiseRouter();
+export const router = express.Router();
 
 router.use((req, res, next) => {
   res.setHeader('Cache-Control', 'max-age=0, no-store');

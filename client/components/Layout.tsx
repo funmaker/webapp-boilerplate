@@ -1,25 +1,38 @@
-import React from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { keyframes, styled } from "@mui/material";
 import { transientOptions } from "../helpers/utils";
-import useMeasure from "../hooks/useMeasure";
 
 const MOBILE_WIDTH = 800;
 const MIN_WIDTH = 350;
 const MIN_HEIGHT = 600;
 
-interface LayoutProps {
+export interface LayoutProps {
   children: React.ReactNode;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
-export default function Layout({ children }: LayoutProps) {
-  const { rect, ref } = useMeasure();
-  const compact = rect ? rect.width < MOBILE_WIDTH : false;
+interface WindowSize {
+  width: number;
+  height: number;
+}
+
+export default function Layout({ children, ref }: LayoutProps) {
+  const [rect, setRect] = useState<null | WindowSize>(null);
   const scale = rect ? Math.min(rect.width / MIN_WIDTH, rect.height / MIN_HEIGHT, 1.0) * 100 : 100;
+  const compact = rect ? rect.width < MOBILE_WIDTH : false;
+  
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRect({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", () => {
+      setRect({ width: window.innerWidth, height: window.innerHeight });
+    });
+  }, []);
   
   return (
     <StyledLayout $compact={compact}
-                  ref={ref}
-                  style={{ fontSize: scale < 100 ? `${scale}%` : undefined }}>
+                  style={{ fontSize: scale < 100 ? `${scale}%` : undefined }}
+                  ref={ref}>
       {children}
       <StyledBubbles>
         <StyledBubble />
@@ -67,6 +80,7 @@ const StyledBubbles = styled("div")`
   left: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   z-index: -1;
   pointer-events: none;
 `;

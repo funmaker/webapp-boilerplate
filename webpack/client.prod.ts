@@ -1,6 +1,6 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { merge } from "webpack-merge";
-import commons from "./client.commons.mjs";
+import commons from "./client.commons";
 
 // noinspection JSUnusedGlobalSymbols
 export default merge(commons, {

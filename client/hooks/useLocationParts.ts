@@ -7,6 +7,8 @@ export interface LocationParts {
   hash: string;
 }
 
+export type LocationLevel = "none" | "pathname" | "search" | "hash" | "all";
+
 export default function useLocationParts() {
   const [location, replaceLocation] = useLocation();
   
@@ -23,4 +25,13 @@ export default function useLocationParts() {
   const parts = useMemo<LocationParts>(() => ({ pathname, search, hash }), [pathname, search, hash]);
   
   return [parts, replaceLocation] as const;
+}
+
+export function locationCmp(a: LocationParts, b: LocationParts, level: LocationLevel = "search") {
+  switch(level) {
+    case "none": return true;
+    case "pathname": return a.pathname === b.pathname;
+    case "search": return a.pathname === b.pathname && a.search === b.search;
+    case "hash": case "all": return a.pathname === b.pathname && a.search === b.search && a.hash === b.hash;
+  }
 }

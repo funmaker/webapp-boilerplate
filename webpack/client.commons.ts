@@ -1,17 +1,29 @@
 import path from 'path';
+import type webpack from "webpack";
 
 const root = process.cwd();
 
+export const reactPresetOptions = {
+  runtime: "automatic",
+  development: false,
+};
+
+export const reactCompilerOptions = {
+  panicThreshold: 'none',
+};
+
 export const babelOptions = {
   presets: [
+    "@babel/preset-typescript",
+    ["@babel/preset-react", reactPresetOptions],
     ["@babel/preset-env", {
       targets: {
         browsers: "last 2 versions",
       },
     }],
-    "@babel/preset-react",
-  ],
+  ] as Array<string | [string, ...any[]]>,
   plugins: [
+    ['babel-plugin-react-compiler', reactCompilerOptions],
     ['@emotion', {
       importMap: {
         '@mui/material': {
@@ -22,7 +34,7 @@ export const babelOptions = {
         },
       },
     }],
-  ],
+  ] as Array<string | [string, ...any[]]>,
 };
 
 // noinspection JSUnusedGlobalSymbols
@@ -41,21 +53,14 @@ export default {
   module: {
     rules: [
       {
-        test: /\.ts$|\.tsx$/,
+        test: /\.ts$|\.tsx$|\.js$|\.jsx$/,
         exclude: /(node_modules)/,
         use: [
           {
             loader: 'babel-loader',
             options: babelOptions,
-          }, {
-            loader: 'ts-loader',
           },
         ],
-      }, {
-        test: /\.js$|\.jsx$/,
-        exclude: /(node_modules)/,
-        loader: 'babel-loader',
-        options: babelOptions,
       }, {
         test: /\.css$/,
         use: [
@@ -70,4 +75,4 @@ export default {
       },
     ],
   },
-};
+} satisfies webpack.Configuration as webpack.Configuration;

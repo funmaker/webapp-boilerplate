@@ -33,7 +33,7 @@ declare module "express-serve-static-core" {
       req: RequestEx<P, ResBody, ReqData>,
       res: ResponseEx<ResBody>,
       next: core.NextFunction,
-    ): void;
+    ): void | Promise<void>;
   }
   
   export interface ErrorRequestHandlerEx<
@@ -46,7 +46,7 @@ declare module "express-serve-static-core" {
       req: RequestEx<P, ResBody, ReqData>,
       res: ResponseEx<ResBody>,
       next: core.NextFunction,
-    ): void;
+    ): void | Promise<void>;
   }
   
   export interface IRouterMatcher<T> {
@@ -58,7 +58,5 @@ declare module "express-serve-static-core" {
 }
 
 declare module 'express-session' {
-  interface SessionData {
-    
-  }
+  interface SessionData {}
 }

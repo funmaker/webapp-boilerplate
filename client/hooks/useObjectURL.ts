@@ -1,28 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 
-interface Change {
-  (value: null): null;
-  (value: Blob): string;
-  (value: Blob | null): string | null;
-}
-
-export default function useObjectURL() {
-  const [url, setUrl] = useState<string | null>(null);
+export default function useObjectURL(object: Blob | MediaSource | string): string;
+export default function useObjectURL(object?: Blob | MediaSource | string | null): string | null;
+export default function useObjectURL(object: Blob | MediaSource | string | null = null): string | null {
+  const { url, objectUrl } = useMemo(() => {
+    if(object === null) return { url: null, objectUrl: false };
+    else if(typeof object === "string") return { url: object, objectUrl: false };
+    else return { url: URL.createObjectURL(object), objectUrl: true };
+  }, [object]);
   
-  const change = useCallback((object: Blob | null) => {
-    let url: string | null;
-    if(object === null) url = null;
-    else url = URL.createObjectURL(object);
-    
-    setUrl(url);
-    return url;
-  }, []) as Change;
+  useEffect(() => () => {
+    if(objectUrl && url) URL.revokeObjectURL(url);
+  }, [url, objectUrl]);
   
-  useEffect(() => {
-    return () => {
-      if(url) URL.revokeObjectURL(url);
-    };
-  }, [url]);
-  
-  return [url, change] as const;
+  return url;
 }

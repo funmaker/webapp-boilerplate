@@ -1,22 +1,36 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import path from 'path';
 import nodeExternals from 'webpack-node-externals';
+import type webpack from "webpack";
 
 const root = process.cwd();
 
 export const pureESM = [
   "wouter",
+  "chalk",
 ];
+
+export const reactPresetOptions = {
+  runtime: "automatic",
+  development: false,
+};
+
+export const reactCompilerOptions = {
+  panicThreshold: 'none',
+};
 
 export const babelOptions = {
   presets: [
+    "@babel/preset-typescript",
+    ["@babel/preset-react", reactPresetOptions],
     ["@babel/preset-env", {
       targets: {
         node: "current",
       },
     }],
-    "@babel/preset-react",
-  ],
+  ] as Array<string | [string, ...any[]]>,
   plugins: [
+    ['babel-plugin-react-compiler', reactCompilerOptions],
     ['@emotion', {
       importMap: {
         '@mui/material': {
@@ -27,7 +41,7 @@ export const babelOptions = {
         },
       },
     }],
-  ],
+  ] as Array<string | [string, ...any[]]>,
 };
 
 // noinspection JSUnusedGlobalSymbols
@@ -54,20 +68,14 @@ export default {
   module: {
     rules: [
       {
-        test: /\.ts$|\.tsx$/,
+        test: /\.ts$|\.tsx$|\.js$|\.jsx$/,
         exclude: /(node_modules)/,
-        use: [{
+        use: [
+          {
             loader: 'babel-loader',
             options: babelOptions,
-          }, {
-            loader: 'ts-loader',
           },
         ],
-      }, {
-        test: /\.js$|\.jsx$/,
-        exclude: /(node_modules)/,
-        loader: 'babel-loader',
-        options: babelOptions,
       }, {
         test: /\.handlebars$/,
         loader: 'handlebars-loader',
@@ -80,4 +88,4 @@ export default {
       },
     ],
   },
-};
+} satisfies webpack.Configuration as webpack.Configuration;

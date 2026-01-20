@@ -2,9 +2,12 @@ import path from "path";
 import webpack from 'webpack';
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { merge } from "webpack-merge";
-import commons, { babelOptions } from "./client.commons.mjs";
+import commons, { babelOptions, reactCompilerOptions, reactPresetOptions } from "./client.commons";
 
-babelOptions.plugins.unshift(require.resolve('react-refresh/babel'));
+reactCompilerOptions.panicThreshold = "all_errors";
+reactPresetOptions.development = true;
+babelOptions.plugins.splice(1, 0, require.resolve('react-refresh/babel'));
+
 const root = process.cwd();
 
 export default merge(commons, {
@@ -19,6 +22,8 @@ export default merge(commons, {
   ],
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new ReactRefreshWebpackPlugin(),
+    new ReactRefreshWebpackPlugin({
+      overlay: { sockIntegration: "whm" },
+    }),
   ],
 });

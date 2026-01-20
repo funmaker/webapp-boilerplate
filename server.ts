@@ -20,8 +20,8 @@ console.log(`\n${chalk.bold("Boilerplate")} started on ${chalk.yellow.bold(`http
 console.log(`Environment: ${chalk.yellow.bold("" + process.env.NODE_ENV)}.`);
 console.log(chalk.dim.white(`Press Ctrl-C to terminate.\n`));
 
-if(module.hot) {
-  module.hot.accept('./server/app', () => {
+if(import.meta.webpackHot) {
+  import.meta.webpackHot.accept('./server/app', () => {
     let newApp = app;
     if(origApp === newApp) newApp = require("./server/app").default;
     server.removeListener('request', currentApp);

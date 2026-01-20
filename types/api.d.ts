@@ -31,3 +31,5 @@ export interface IndexPageResponse {
 /////////////////////////
 //         API         //
 /////////////////////////
+
+export interface User {}

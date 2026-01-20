@@ -1,9 +1,12 @@
+import path from "path";
 import webpack from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import { merge } from "webpack-merge";
-import path from "path";
 import { RunScriptWebpackPlugin } from 'run-script-webpack-plugin'; // https://github.com/ericclemmons/start-server-webpack-plugin/issues/40
-import commons, { pureESM } from "./server.commons.mjs";
+import commons, { pureESM, reactCompilerOptions, reactPresetOptions } from "./server.commons";
+
+reactCompilerOptions.panicThreshold = "all_errors";
+reactPresetOptions.development = true;
 
 const isWin = process.platform === "win32";
 const root = process.cwd();
@@ -12,6 +15,7 @@ export default merge(commons, {
   mode: 'development',
   devtool: 'inline-source-map',
   output: {
+    ...commons.output,
     path: path.join(root, 'build'),
   },
   entry: [
@@ -28,7 +32,7 @@ export default merge(commons, {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new RunScriptWebpackPlugin({
-      name: commons.output.filename,
+      name: commons.output?.filename as (string | undefined) || "server.js",
       signal: !isWin,
       autoRestart: false,
     }),

@@ -1,5 +1,5 @@
 import { AxiosError, AxiosResponse } from "axios";
-import { toast } from "react-toastify";
+import { toast, Id } from "react-toastify";
 import { ErrorResponse } from "../../types/api";
 
 export class ClientError extends Error {
@@ -7,7 +7,7 @@ export class ClientError extends Error {
   response: AxiosResponse<ErrorResponse> | null;
   inner: any;
   toastTimeout: NodeJS.Timeout | null = null;
-  toastId: React.ReactText | null = null;
+  toastId: Id | null = null;
   
   constructor(error: AxiosError<ErrorResponse> | ErrorResponse | Error) {
     const anyError = error as any;

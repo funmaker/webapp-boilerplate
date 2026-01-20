@@ -10,7 +10,7 @@ export function SSRProvider({ children }: SSRProviderProps) {
   const [ssr, setSSR] = useState(true);
   
   useEffect(() => {
-    setSSR(false);
+    setSSR(false); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
   
   return (

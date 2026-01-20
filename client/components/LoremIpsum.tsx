@@ -4,16 +4,18 @@ import { ILoremIpsumParams, loremIpsum } from "lorem-ipsum";
 import SSRCurtain from "./SSRCurtain";
 import "./LoremIpsum.scss";
 
-export type LoremIpsumProps = ILoremIpsumParams;
+export interface LoremIpsumProps extends ILoremIpsumParams {
+  ref?: React.Ref<HTMLSpanElement>;
+}
 
-export default function LoremIpsum(props: LoremIpsumProps) {
+export default function LoremIpsum({ ref, ...props }: LoremIpsumProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const text = useMemo(() => loremIpsum(props), [...Object.values(props)]);
   
   return (
-    <span>
-      <SSRCurtain>{text}</SSRCurtain>
-    </span>
+    <SSRCurtain>
+      <StyledLoremIpsum ref={ref}>{text}</StyledLoremIpsum>
+    </SSRCurtain>
   );
 }
 

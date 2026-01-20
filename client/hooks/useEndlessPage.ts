@@ -127,7 +127,7 @@ export default function useEndlessPage<Res, Req extends Pageable, I>(options: En
     if(reset.isPending()) return;
     
     if(optionsRef.current.fetchOverride !== undefined) {
-      if(optionsRef.current.fetchOverride) requestNext();
+      if(optionsRef.current.fetchOverride) requestNext().catch(console.error);
       
       return;
     }
@@ -148,7 +148,7 @@ export default function useEndlessPage<Res, Req extends Pageable, I>(options: En
       innerHeight = window.innerHeight;
     }
     
-    if(scrollHeight - bottomPosition <= innerHeight * 0.5) requestNext();
+    if(scrollHeight - bottomPosition <= innerHeight * 0.5) requestNext().catch(console.error);
   }, [context, optionsRef, requestNext, reset]);
   
   useChange(deps, reset, arrayCmp);

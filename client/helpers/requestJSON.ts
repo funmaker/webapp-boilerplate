@@ -2,6 +2,7 @@ import isNode from 'detect-node';
 import axios, { Canceler, AxiosRequestConfig } from 'axios';
 import { qsStringify } from './utils';
 import { ClientError } from "./clientError";
+import { getCSRF } from "./csrf";
 
 const CancelToken = axios.CancelToken;
 
@@ -54,7 +55,7 @@ export default async function requestJSON<Res = void, Req = never>({ url = "", s
       cancelToken: cancelCb ? new CancelToken(cancelCb) : undefined,
       headers: {
         ...headers,
-        'CSRF-Token': window._csrf,
+        'CSRF-Token': getCSRF(),
       },
     });
     
@@ -62,7 +63,7 @@ export default async function requestJSON<Res = void, Req = never>({ url = "", s
   } catch(err: any) {
     err = new ClientError(err);
     
-    if(!axios.isCancel(err.inner)) err.prepareNotify();
+    if(!axios.isCancel(err.inner)) (err as ClientError).prepareNotify();
     
     throw err;
   }

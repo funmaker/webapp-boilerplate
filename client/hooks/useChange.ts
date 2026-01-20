@@ -7,13 +7,11 @@ export const arrayCmp = <T extends readonly any[]>(a: T, b: T) => a.length === b
 
 export default function useChange<T>(val: T, callback: Callback<T>, cmpFn: Compare<T> = defaultCmp) {
   const valRef = useRef(val);
-  const callbackRef = useRef(callback);
-  callbackRef.current = callback;
   
   useEffect(() => {
     if(!cmpFn(val, valRef.current)) {
-      callbackRef.current(val, valRef.current);
+      callback(val, valRef.current);
       valRef.current = val;
     }
-  }, [cmpFn, val]);
+  }, [callback, cmpFn, val]);
 }
