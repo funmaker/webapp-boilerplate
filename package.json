@@ -89,7 +89,7 @@
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^7.0.1",
 		"globals": "^17.0.0",
-		"handlebars": "^4.7.8",
+		"handlebars": "^4.7.9",
 		"handlebars-loader": "^1.7.3",
 		"ignore-loader": "^0.1.2",
 		"jiti": "^2.6.1",
