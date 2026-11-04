@@ -35,7 +35,7 @@
 		"csurf": "^1.11.0",
 		"detect-node": "^2.1.0",
 		"express": "^5.2.1",
-		"express-handlebars": "^8.0.4",
+		"express-handlebars": "^9.0.4",
 		"express-session": "^1.18.2",
 		"lorem-ipsum": "^2.0.8",
 		"morgan": "^1.12.1",
